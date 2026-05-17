@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SQLScout — Design Preview</title>
+<link rel="stylesheet" href="./tokens.css" />
+<link rel="stylesheet" href="./app.css" />
+</head>
+<body>
+<div class="app-bg" aria-hidden="true"></div>
+
+<div class="app">
+
+  <!-- ============== TOP BAR ============== -->
+  <header class="topbar rise" style="--d:0ms">
+    <div class="brand">
+      <div class="brand__mark">sql<em>scout</em></div>
+      <div class="brand__tag">v0.1 · alpha</div>
+    </div>
+
+    <div class="topbar__center">
+      <button class="dialect-picker" type="button">
+        <span class="dialect-picker__dot"></span>
+        <span>POSTGRESQL</span>
+        <span class="label-caps" style="color:var(--ash-dim)">15.4</span>
+        <span class="dialect-picker__chev">▾</span>
+      </button>
+
+      <button class="btn btn--ghost" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h10M4 18h16"/></svg>
+        Format
+        <span class="btn__kbd">⇧⌥F</span>
+      </button>
+
+      <button class="btn btn--accent" type="button">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg>
+        Parse
+        <span class="btn__kbd">⌘↵</span>
+      </button>
+
+      <button class="btn" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>
+        Export
+      </button>
+    </div>
+
+    <div class="topbar__right">
+      <button class="icon-btn" title="Layout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+      <button class="icon-btn" title="Theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+      </button>
+      <button class="icon-btn" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 0 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 0 1 4 0v.09c0 .67.4 1.27 1.03 1.51a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.24.63.84 1.03 1.51 1.03H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============== MAIN ============== -->
+  <main class="main">
+
+    <!-- LEFT: COMMAND EXPLORER -->
+    <section class="panel panel--marked rise" style="--d:60ms">
+      <div class="panel__header">
+        <div class="panel__title">command explorer <span>· postgres</span></div>
+        <div class="panel__actions">
+          <button class="icon-btn" title="Filter"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h18M6 12h12M10 19h4"/></svg></button>
+        </div>
+      </div>
+
+      <div class="explorer-tabs">
+        <button class="explorer-tab" data-active="true">Commands</button>
+        <button class="explorer-tab">Samples</button>
+        <button class="explorer-tab">Schema</button>
+      </div>
+
+      <div class="explorer-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ash)" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input placeholder="filter commands…" />
+        <span class="explorer-search__kbd">⌘K</span>
+      </div>
+
+      <div class="panel__body">
+
+        <div class="explorer-group">
+          <div class="explorer-group__head">
+            <div class="explorer-group__title">Data Manipulation</div>
+            <div class="explorer-group__count">04 / 04</div>
+          </div>
+          <div class="cmd" data-active="true">
+            <div class="cmd__icon">S</div>
+            <div class="cmd__name">SELECT</div>
+            <div class="cmd__meta">13 dialects</div>
+          </div>
+          <div class="cmd"><div class="cmd__icon">I</div><div class="cmd__name">INSERT</div><div class="cmd__meta">13</div></div>
+          <div class="cmd"><div class="cmd__icon">U</div><div class="cmd__name">UPDATE</div><div class="cmd__meta">13</div></div>
+          <div class="cmd"><div class="cmd__icon">D</div><div class="cmd__name">DELETE</div><div class="cmd__meta">13</div></div>
+        </div>
+
+        <div class="explorer-group">
+          <div class="explorer-group__head">
+            <div class="explorer-group__title">Joins</div>
+            <div class="explorer-group__count">06</div>
+          </div>
+          <div class="cmd"><div class="cmd__icon">⋈</div><div class="cmd__name">INNER JOIN</div><div class="cmd__meta">13</div></div>
+          <div class="cmd"><div class="cmd__icon">⟕</div><div class="cmd__name">LEFT JOIN</div><div class="cmd__meta">13</div></div>
+          <div class="cmd"><div class="cmd__icon">⟖</div><div class="cmd__name">RIGHT JOIN</div><div class="cmd__meta">12</div></div>
+          <div class="cmd"><div class="cmd__icon">⟗</div><div class="cmd__name">FULL JOIN</div><div class="cmd__meta">11</div></div>
+          <div class="cmd"><div class="cmd__icon">×</div><div class="cmd__name">CROSS JOIN</div><div class="cmd__meta">13</div></div>
+          <div class="cmd"><div class="cmd__icon">L</div><div class="cmd__name">LATERAL</div><div class="cmd__meta">4 · pg, snowflake</div></div>
+        </div>
+
+        <div class="explorer-group">
+          <div class="explorer-group__head">
+            <div class="explorer-group__title">CTE &amp; Recursion</div>
+            <div class="explorer-group__count">02</div>
+          </div>
+          <div class="cmd"><div class="cmd__icon">W</div><div class="cmd__name">WITH</div><div class="cmd__meta">13</div></div>
+          <div class="cmd"><div class="cmd__icon">R</div><div class="cmd__name">RECURSIVE</div><div class="cmd__meta">11</div></div>
+        </div>
+
+        <div class="explorer-group">
+          <div class="explorer-group__head">
+            <div class="explorer-group__title">Window Functions</div>
+            <div class="explorer-group__count">07</div>
+          </div>
+          <div class="cmd"><div class="cmd__icon">O</div><div class="cmd__name">OVER ()</div><div class="cmd__meta">12</div></div>
+          <div class="cmd"><div class="cmd__icon">P</div><div class="cmd__name">PARTITION BY</div><div class="cmd__meta">12</div></div>
+          <div class="cmd"><div class="cmd__icon">#</div><div class="cmd__name">ROW_NUMBER ()</div><div class="cmd__meta">12</div></div>
+          <div class="cmd"><div class="cmd__icon">↑</div><div class="cmd__name">RANK ()</div><div class="cmd__meta">12</div></div>
+          <div class="cmd"><div class="cmd__icon">↩</div><div class="cmd__name">LAG / LEAD</div><div class="cmd__meta">12</div></div>
+        </div>
+
+        <div class="explorer-group">
+          <div class="explorer-group__head">
+            <div class="explorer-group__title">Data Definition</div>
+            <div class="explorer-group__count">06</div>
+          </div>
+          <div class="cmd"><div class="cmd__icon">C</div><div class="cmd__name">CREATE TABLE</div><div class="cmd__meta">13</div></div>
+          <div class="cmd"><div class="cmd__icon">A</div><div class="cmd__name">ALTER TABLE</div><div class="cmd__meta">13</div></div>
+          <div class="cmd"><div class="cmd__icon">×</div><div class="cmd__name">DROP</div><div class="cmd__meta">13</div></div>
+          <div class="cmd"><div class="cmd__icon">T</div><div class="cmd__name">TRUNCATE</div><div class="cmd__meta">12</div></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CENTER: EDITOR -->
+    <section class="panel rise" style="--d:120ms">
+      <div class="panel__header">
+        <div class="panel__title">editor <span>· untitled.sql</span></div>
+        <div class="panel__actions">
+          <span class="label-caps" style="color:var(--ash-dim)">UTF-8 · LF</span>
+        </div>
+      </div>
+
+      <div class="editor-tabs">
+        <div class="editor-tab" data-active="true">
+          <span class="editor-tab__dirty"></span>
+          monthly-revenue.sql
+          <span class="editor-tab__close">×</span>
+        </div>
+        <div class="editor-tab">cohort-analysis.sql</div>
+        <div class="editor-tab" style="color:var(--ash-dim)">+ new</div>
+      </div>
+
+      <div class="editor">
+        <div class="editor__gutter">
+          <span>01</span><span>02</span><span>03</span><span>04</span><span>05</span>
+          <span>06</span><span>07</span><span>08</span><span>09</span><span>10</span>
+          <span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+          <span>16</span><span>17</span><span>18</span><span>19</span>
+        </div>
+        <div class="editor__code"><span class="tk-comment">-- monthly revenue by tier, last 90 days</span>
+<span class="tk-keyword">WITH</span> recent_orders <span class="tk-keyword">AS</span> (
+  <span class="tk-keyword">SELECT</span>
+    o.<span class="tk-column">id</span>,
+    o.<span class="tk-column">user_id</span>,
+    o.<span class="tk-column">total_cents</span>,
+    <span class="tk-fn">DATE_TRUNC</span>(<span class="tk-string">'month'</span>, o.<span class="tk-column">created_at</span>) <span class="tk-keyword">AS</span> month
+  <span class="tk-keyword">FROM</span> <span class="tk-table">orders</span> o
+  <span class="tk-keyword">WHERE</span> o.<span class="tk-column">created_at</span> <span class="tk-op">&gt;=</span> <span class="tk-fn">NOW</span>() <span class="tk-op">-</span> <span class="tk-keyword">INTERVAL</span> <span class="tk-string">'90 days'</span>
+)
+<span class="tk-keyword">SELECT</span>
+  u.<span class="tk-column">tier</span>,
+  r.<span class="tk-column">month</span>,
+  <span class="tk-fn">COUNT</span>(<span class="tk-op">*</span>) <span class="tk-keyword">AS</span> orders,
+  <span class="tk-fn">SUM</span>(r.<span class="tk-column">total_cents</span>) <span class="tk-op">/</span> <span class="tk-number">100.0</span> <span class="tk-keyword">AS</span> revenue
+<span class="tk-keyword">FROM</span> recent_orders r
+<span class="tk-keyword">JOIN</span> <span class="tk-table">users</span> u <span class="tk-keyword">ON</span> u.<span class="tk-column">id</span> <span class="tk-op">=</span> r.<span class="tk-column">user_id</span>
+<span class="tk-keyword">GROUP BY</span> u.<span class="tk-column">tier</span>, r.<span class="tk-column">month</span>
+<span class="tk-keyword">ORDER BY</span> r.<span class="tk-column">month</span> <span class="tk-keyword">DESC</span>, revenue <span class="tk-keyword">DESC</span>;
+</div>
+      </div>
+    </section>
+
+    <!-- RIGHT: FLOW DIAGRAM -->
+    <section class="panel panel--marked rise" style="--d:180ms">
+      <div class="panel__header">
+        <div class="panel__title">execution flow <span>· vertical layout</span></div>
+        <div class="panel__actions">
+          <button class="icon-btn" title="Layout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h6M3 12h12M3 18h18"/></svg>
+          </button>
+          <button class="icon-btn" title="Fit">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+          <button class="icon-btn" title="Fullscreen">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="flow">
+        <!-- SVG edges -->
+        <svg class="flow__svg" viewBox="0 0 600 800" preserveAspectRatio="none">
+          <!-- orders → recent_orders (CTE) -->
+          <path class="flow__edge" d="M 145 105 C 145 145, 300 145, 300 195"/>
+          <!-- recent_orders → join -->
+          <path class="flow__edge flow__edge--active" d="M 300 295 L 300 365"/>
+          <!-- users → join -->
+          <path class="flow__edge" d="M 460 105 C 460 165, 300 305, 300 365"/>
+          <!-- join → group -->
+          <path class="flow__edge flow__edge--active" d="M 300 445 L 300 515"/>
+          <!-- group → order -->
+          <path class="flow__edge flow__edge--active" d="M 300 595 L 300 665"/>
+        </svg>
+
+        <div class="flow__canvas">
+          <div class="node node--table" style="left:80px; top:40px;">
+            <span class="node__pin node__pin--out"></span>
+            <div class="node__head">
+              <div class="node__kind">table</div>
+              <div class="node__title">orders</div>
+            </div>
+            <div class="node__body">
+              <code>id · user_id · total_cents · created_at</code>
+            </div>
+          </div>
+
+          <div class="node node--table" style="right:60px; top:40px;">
+            <span class="node__pin node__pin--out"></span>
+            <div class="node__head">
+              <div class="node__kind">table</div>
+              <div class="node__title">users</div>
+            </div>
+            <div class="node__body">
+              <code>id · tier · email</code>
+            </div>
+          </div>
+
+          <div class="node node--cte" style="left:50%; top:200px; transform:translateX(-50%); min-width:220px;">
+            <span class="node__pin node__pin--in"></span>
+            <span class="node__pin node__pin--out"></span>
+            <div class="node__head">
+              <div class="node__kind">cte</div>
+              <div class="node__title">recent_orders</div>
+            </div>
+            <div class="node__body">
+              filter <code>created_at ≥ now − 90d</code>
+            </div>
+          </div>
+
+          <div class="node node--join" style="left:50%; top:370px; transform:translateX(-50%); min-width:240px;">
+            <span class="node__pin node__pin--in"></span>
+            <span class="node__pin node__pin--out"></span>
+            <div class="node__head">
+              <div class="node__kind">inner join</div>
+              <div class="node__title">users ⋈ recent_orders</div>
+            </div>
+            <div class="node__body">
+              on <code>u.id = r.user_id</code>
+            </div>
+          </div>
+
+          <div class="node node--agg" style="left:50%; top:520px; transform:translateX(-50%); min-width:220px;">
+            <span class="node__pin node__pin--in"></span>
+            <span class="node__pin node__pin--out"></span>
+            <div class="node__head">
+              <div class="node__kind">group by</div>
+              <div class="node__title">tier, month</div>
+            </div>
+            <div class="node__body">
+              <code>count(*), sum(total_cents)</code>
+            </div>
+          </div>
+
+          <div class="node node--proj" style="left:50%; top:670px; transform:translateX(-50%); min-width:220px;">
+            <span class="node__pin node__pin--in"></span>
+            <div class="node__head">
+              <div class="node__kind">order by</div>
+              <div class="node__title">month desc, revenue desc</div>
+            </div>
+            <div class="node__body">
+              <code>4 columns projected</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map legend (cartographic touch) -->
+        <div class="legend">
+          <div class="legend__row"><span class="legend__sw" style="background:var(--node-table)"></span>table</div>
+          <div class="legend__row"><span class="legend__sw" style="background:var(--node-cte)"></span>cte</div>
+          <div class="legend__row"><span class="legend__sw" style="background:var(--node-join)"></span>join</div>
+          <div class="legend__row"><span class="legend__sw" style="background:var(--node-agg)"></span>aggregate</div>
+          <div class="legend__row"><span class="legend__sw" style="background:var(--node-proj)"></span>projection</div>
+        </div>
+
+        <!-- Minimap -->
+        <div class="minimap"><div class="minimap__view"></div></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============== STATUS BAR ============== -->
+  <footer class="statusbar rise" style="--d:240ms">
+    <div class="statusbar__group">
+      <div class="statusbar__item"><span class="dot dot--ok"></span><strong>parsed</strong> · 2 statements · 0 errors</div>
+      <div class="statusbar__item"><span>cursor</span> <strong>L 14, C 22</strong></div>
+      <div class="statusbar__item"><span>parser</span> <strong>postgres 15.4</strong></div>
+    </div>
+
+    <div class="statusbar__group">
+      <div class="statusbar__item">
+        <span>performance</span>
+        <span class="score"><span class="score__n">84</span><span class="score__d">/100</span></span>
+      </div>
+      <div class="statusbar__item"><span>nodes</span> <strong>6</strong></div>
+      <div class="statusbar__item"><span>edges</span> <strong>5</strong></div>
+      <div class="statusbar__item" style="color:var(--accent)">⌘P  command palette</div>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

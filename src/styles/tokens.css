@@ -1,0 +1,195 @@
+/* SQLScout — Design Tokens
+ * Aesthetic: Surveyor's Blueprint — cartographic / technical-engineer
+ * Dark-first with light mode parity.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=DM+Sans:opsz,wght@9..40,300..700&family=JetBrains+Mono:wght@300..700&display=swap');
+
+:root {
+  /* ---------- Type ---------- */
+  --font-display: 'Fraunces', 'Times New Roman', serif;
+  --font-ui: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  --fs-xs: 0.6875rem;   /* 11 */
+  --fs-sm: 0.8125rem;   /* 13 */
+  --fs-md: 0.9375rem;   /* 15 */
+  --fs-lg: 1.125rem;    /* 18 */
+  --fs-xl: 1.5rem;      /* 24 */
+  --fs-2xl: 2rem;       /* 32 */
+  --fs-display: 2.75rem;
+
+  --lh-tight: 1.1;
+  --lh-normal: 1.45;
+  --lh-loose: 1.65;
+
+  --tracking-tight: -0.015em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.08em;
+  --tracking-wider: 0.18em;
+
+  /* ---------- Spacing ---------- */
+  --s-0: 0;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* ---------- Radius ---------- */
+  --r-none: 0;
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --r-pill: 999px;
+
+  /* ---------- Borders ---------- */
+  --bw-hair: 1px;
+  --bw-rule: 1px;
+  --bw-heavy: 2px;
+
+  /* ---------- Layout ---------- */
+  --topbar-h: 52px;
+  --statusbar-h: 28px;
+  --panel-min: 240px;
+  --panel-max: 360px;
+  --gutter: 1px;
+
+  /* ---------- Z ---------- */
+  --z-base: 1;
+  --z-panel: 10;
+  --z-overlay: 50;
+  --z-modal: 100;
+  --z-tooltip: 200;
+
+  /* ---------- Motion ---------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 420ms;
+}
+
+/* ---------- Dark theme (default) ---------- */
+:root, [data-theme="dark"] {
+  --ink-0: #07090D;        /* deepest base */
+  --ink-1: #0A0E14;        /* app bg */
+  --ink-2: #0F141C;        /* surface */
+  --ink-3: #141B26;        /* panel */
+  --ink-4: #1A222F;        /* raised */
+  --ink-5: #232C3B;        /* hover */
+
+  --rule: #1E2733;         /* hairline borders */
+  --rule-soft: #161D27;
+  --rule-strong: #2A3445;
+
+  --bone: #E8E2D2;         /* primary text — warm cream */
+  --bone-dim: #B9B3A4;
+  --ash: #7C8597;          /* secondary */
+  --ash-dim: #4A5263;
+  --ash-faint: #2E3645;
+
+  --accent: #FF6B1F;       /* surveyor orange — the one bold note */
+  --accent-soft: #FF8A4A;
+  --accent-dim: rgba(255, 107, 31, 0.18);
+  --accent-faint: rgba(255, 107, 31, 0.08);
+
+  --lime: #C7F454;         /* success / match */
+  --lime-dim: rgba(199, 244, 84, 0.16);
+
+  --sky: #5B9DFF;          /* info / link */
+  --sky-dim: rgba(91, 157, 255, 0.16);
+
+  --amber: #FFB347;        /* warning */
+  --rose: #FF4D6D;         /* danger */
+
+  /* Syntax (SQL) */
+  --syn-keyword: #FF8A4A;
+  --syn-fn: #C7F454;
+  --syn-string: #FFD479;
+  --syn-number: #5B9DFF;
+  --syn-comment: #4A5263;
+  --syn-operator: #B9B3A4;
+  --syn-table: #E8E2D2;
+  --syn-column: #B9B3A4;
+
+  /* Flow diagram node tints */
+  --node-table: #5B9DFF;
+  --node-join: #FF6B1F;
+  --node-filter: #FFB347;
+  --node-agg: #C7F454;
+  --node-cte: #B57EFF;
+  --node-proj: #E8E2D2;
+
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.02) inset, 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-2: 0 8px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.03) inset;
+
+  --grid-dot: rgba(255,255,255,0.035);
+  --grid-line: rgba(255,255,255,0.025);
+
+  color-scheme: dark;
+}
+
+/* ---------- Light theme ---------- */
+[data-theme="light"] {
+  --ink-0: #FFFFFF;
+  --ink-1: #F4F0E6;        /* warm paper */
+  --ink-2: #FAF7EE;
+  --ink-3: #FFFEFA;
+  --ink-4: #F0EBDD;
+  --ink-5: #E6E0CF;
+
+  --rule: #D8D2C2;
+  --rule-soft: #E6E1D2;
+  --rule-strong: #B8B0A0;
+
+  --bone: #1A1F26;
+  --bone-dim: #3A4150;
+  --ash: #6A7180;
+  --ash-dim: #9298A6;
+  --ash-faint: #C8CCD4;
+
+  --accent: #DC4B0A;
+  --accent-soft: #FF6B1F;
+  --accent-dim: rgba(220, 75, 10, 0.14);
+  --accent-faint: rgba(220, 75, 10, 0.06);
+
+  --lime: #5B7A1F;
+  --lime-dim: rgba(91, 122, 31, 0.14);
+
+  --sky: #2563EB;
+  --sky-dim: rgba(37, 99, 235, 0.10);
+
+  --amber: #B45309;
+  --rose: #C42847;
+
+  --syn-keyword: #DC4B0A;
+  --syn-fn: #5B7A1F;
+  --syn-string: #8A5A00;
+  --syn-number: #2563EB;
+  --syn-comment: #9298A6;
+  --syn-operator: #3A4150;
+  --syn-table: #1A1F26;
+  --syn-column: #3A4150;
+
+  --node-table: #2563EB;
+  --node-join: #DC4B0A;
+  --node-filter: #B45309;
+  --node-agg: #5B7A1F;
+  --node-cte: #7A3FB3;
+  --node-proj: #1A1F26;
+
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.6) inset, 0 1px 2px rgba(50,40,20,0.06);
+  --shadow-2: 0 8px 24px rgba(50,40,20,0.08), 0 1px 0 rgba(255,255,255,0.6) inset;
+
+  --grid-dot: rgba(50,40,20,0.06);
+  --grid-line: rgba(50,40,20,0.04);
+
+  color-scheme: light;
+}

@@ -1,0 +1,21 @@
+id = "sqlscout"
+name = "SQLScout"
+version = "0.1.0"
+schema_version = 1
+authors = ["Daniel Behnke <dthermann@gmail.com>"]
+description = "Open the active SQL in the SQLScout web playground and pull command references into the assistant panel."
+repository = "https://github.com/krassdanke/sqlscout"
+
+[slash_commands.sqlscout]
+description = "Open the current SQL selection in the SQLScout playground"
+requires_argument = false
+
+[slash_commands.sqlscout-ref]
+description = "Insert a SQL command reference (select, join, window, cte, ...)"
+requires_argument = true
+
+[snippets]
+sql = "snippets/sql.json"
+
+[language_servers]
+# Reserved for future sqlscout-ls: parse diagnostics + inline flow data.

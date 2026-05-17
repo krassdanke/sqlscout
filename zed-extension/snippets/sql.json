@@ -1,0 +1,121 @@
+{
+  "SELECT skeleton": {
+    "prefix": "ssel",
+    "body": [
+      "SELECT $1",
+      "FROM $2",
+      "WHERE $3",
+      "ORDER BY $4",
+      "LIMIT $5;"
+    ],
+    "description": "Basic SELECT skeleton."
+  },
+
+  "INNER JOIN": {
+    "prefix": "sjoin",
+    "body": [
+      "JOIN $1 ${2:alias} ON ${2:alias}.${3:fk} = ${4:t}.${5:pk}"
+    ],
+    "description": "Inner join with alias placeholders."
+  },
+
+  "LEFT JOIN": {
+    "prefix": "sljoin",
+    "body": [
+      "LEFT JOIN $1 ${2:alias} ON ${2:alias}.${3:fk} = ${4:t}.${5:pk}"
+    ],
+    "description": "Left join with alias placeholders."
+  },
+
+  "WITH (CTE)": {
+    "prefix": "scte",
+    "body": [
+      "WITH ${1:name} AS (",
+      "  SELECT $2",
+      "  FROM $3",
+      "  WHERE $4",
+      ")",
+      "SELECT $5",
+      "FROM ${1:name};"
+    ],
+    "description": "Common Table Expression skeleton."
+  },
+
+  "WITH RECURSIVE": {
+    "prefix": "screc",
+    "body": [
+      "WITH RECURSIVE ${1:tree} AS (",
+      "  SELECT $2",
+      "  FROM ${3:nodes}",
+      "  WHERE ${4:anchor}",
+      "  UNION ALL",
+      "  SELECT $5",
+      "  FROM ${3:nodes} n",
+      "  JOIN ${1:tree} t ON ${6:t.id = n.parent_id}",
+      ")",
+      "SELECT * FROM ${1:tree};"
+    ],
+    "description": "Recursive CTE for tree/graph traversal."
+  },
+
+  "Window: ROW_NUMBER": {
+    "prefix": "srn",
+    "body": [
+      "ROW_NUMBER() OVER (PARTITION BY $1 ORDER BY $2) AS ${3:rn}"
+    ],
+    "description": "ROW_NUMBER over partition."
+  },
+
+  "Window: RANK": {
+    "prefix": "srank",
+    "body": [
+      "RANK() OVER (PARTITION BY $1 ORDER BY $2) AS ${3:r}"
+    ],
+    "description": "RANK over partition."
+  },
+
+  "Window: LAG / LEAD": {
+    "prefix": "slag",
+    "body": [
+      "LAG(${1:col}, ${2:1}) OVER (PARTITION BY $3 ORDER BY $4) AS ${5:prev}"
+    ],
+    "description": "LAG / LEAD window function."
+  },
+
+  "GROUP BY + HAVING": {
+    "prefix": "sgrp",
+    "body": [
+      "GROUP BY $1",
+      "HAVING ${2:COUNT(*)} > ${3:0}"
+    ],
+    "description": "GROUP BY with HAVING filter."
+  },
+
+  "Upsert (Postgres)": {
+    "prefix": "supsert",
+    "body": [
+      "INSERT INTO ${1:tbl} (${2:cols})",
+      "VALUES (${3:vals})",
+      "ON CONFLICT (${4:key}) DO UPDATE",
+      "SET ${5:col} = EXCLUDED.${5:col};"
+    ],
+    "description": "Postgres-style upsert."
+  },
+
+  "Date truncation by month": {
+    "prefix": "sdtmonth",
+    "body": [
+      "DATE_TRUNC('month', ${1:created_at})"
+    ],
+    "description": "Truncate timestamp to month."
+  },
+
+  "EXPLAIN ANALYZE": {
+    "prefix": "sexplain",
+    "body": [
+      "EXPLAIN ANALYZE",
+      "$1"
+    ],
+    "description": "Wrap a query with EXPLAIN ANALYZE."
+  }
+}
