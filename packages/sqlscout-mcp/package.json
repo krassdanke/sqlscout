@@ -1,0 +1,35 @@
+{
+  "name": "@sqlscout/mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server exposing SQLScout tools (parse, playground URL, reference catalog) to MCP-compatible agents.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/server.js",
+  "bin": {
+    "sqlscout-mcp": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1",
+    "@sqlscout/core": "*",
+    "zod": "^3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5.6",
+    "vitest": "^2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krassdanke/sqlscout.git",
+    "directory": "packages/sqlscout-mcp"
+  }
+}
