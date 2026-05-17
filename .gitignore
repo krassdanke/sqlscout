@@ -11,3 +11,7 @@ dist-ssr
 *.log
 tsconfig.tsbuildinfo
 *.tsbuildinfo
+
+# Zed extension build artifacts
+zed-extension/target/
+zed-extension/extension.wasm
