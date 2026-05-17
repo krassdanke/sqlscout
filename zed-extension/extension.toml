@@ -1,15 +1,13 @@
 id = "sqlscout"
 name = "SQLScout"
-version = "0.1.0"
+version = "0.2.0"
 schema_version = 1
 authors = ["Daniel Behnke <dthermann@gmail.com>"]
-description = "Open the active SQL in the SQLScout web playground and pull command references into the assistant panel."
+description = "SQL hover, code actions, diagnostics, and an MCP context server backed by the SQLScout multi-dialect parser."
 repository = "https://github.com/krassdanke/sqlscout"
 
-[slash_commands.sqlscout]
-description = "Open the current SQL selection in the SQLScout playground"
-requires_argument = false
+[language_servers.sqlscout-ls]
+name = "SQLScout"
+languages = ["SQL", "TypeScript", "TSX", "JavaScript", "JSX", "Python", "Rust", "Go"]
 
-[slash_commands.sqlscout-ref]
-description = "Insert a SQL command reference (select, join, window, cte, ...)"
-requires_argument = true
+[context_servers.sqlscout-mcp]

@@ -1,60 +1,38 @@
 # SQLScout - Zed extension
 
-Bridge between the Zed editor and the SQLScout multi-dialect SQL playground.
+SQL hover, code actions, diagnostics, and an MCP context server backed by the
+SQLScout multi-dialect parser.
 
 ## Capabilities
 
-| Capability      | What it does                                                       |
-|-----------------|--------------------------------------------------------------------|
-| `/sqlscout`     | Build a playground URL from the SQL you just typed.                |
-| `/sqlscout-ref` | Insert a compact reference card for a SQL construct.               |
-| Snippets        | `ssel`, `scte`, `screc`, `sjoin`, `srn`, `supsert`, ... in Zed.    |
-
-Zed's extension surface does not (yet) host rich UI panes, so the visual flow
-diagram itself stays in the web playground. The extension's job is to make the
-jump there friction-free and to bring SQLScout's command reference into the
-assistant context.
+| Surface              | What it does                                                                                                                                              |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| LSP `@sqlscout/ls`   | Hover summaries, "Open in SQLScout" + "Extract to .sql" code actions, parse + GROUP-BY-by-position diagnostics on SQL embedded in TS/JS/Py/Rs/Go.        |
+| MCP `@sqlscout/mcp`  | Four tools in the Agent panel: `parse`, `playground_url`, `reference`, `list_topics`.                                                                     |
+| Snippets             | `ssel`, `scte`, `sjoin`, `srn`, `supsert`, ... (unchanged, see `snippets/sql.json`).                                                                      |
+| Task                 | "SQLScout: open selection in playground" — bind to a key for one-shot browser open.                                                                       |
 
 ## Install (dev)
 
-1. Zed v0.150+ installed.
-2. From this repo: `cd zed-extension/`.
-3. In Zed: command palette -> "zed: install dev extension" -> pick this folder.
-4. Try it: `/sqlscout SELECT * FROM users` should produce a clickable link.
+Node 20+ required on the user machine (the LSP and MCP server are Node binaries
+pulled lazily via `npx`).
 
-## Slash commands
+1. In Zed: command palette -> "zed: install dev extension" -> pick this folder.
+2. On first hover or agent call, `npx -y` will fetch `@sqlscout/ls` and
+   `@sqlscout/mcp` from npm (~5s cold start; cached afterwards).
 
-### `/sqlscout [sql...]`
+## Suggested keybind
 
-Builds `https://sqlscout.app/?q=<url-encoded-sql>`. With no argument it returns
-the bare playground URL.
+Add to your Zed `keymap.json`:
 
-### `/sqlscout-ref <topic>`
-
-Inserts a syntax-block + one-line summary for the requested topic. Argument
-completion enumerates the catalog (`select`, `inner-join`, `with-recursive`,
-`over`, `rollup`, ...).
-
-## Snippets
-
-Defined in `snippets/sql.json` (VS Code-compatible format, which Zed reads).
-Every prefix starts with `s` (`ssel`, `scte`, `srn`, ...) to avoid colliding
-with other autocomplete sources.
-
-## Building
-
-The crate compiles to a single `cdylib` consumed by Zed's WASM extension host:
-
-```sh
-cd zed-extension
-cargo build --release --target wasm32-wasip1
+```json
+{ "context": "Editor", "bindings": { "cmd-alt-s": ["task::Spawn", { "task_name": "SQLScout: open selection in playground" }] } }
 ```
 
-`zed_extension_api` >= 0.2 is the only runtime dependency.
+macOS users: swap `xdg-open` for `open` in `tasks.json` (or override in your
+user tasks).
 
 ## Roadmap
 
-- [ ] `sqlscout-ls` language server: parse diagnostics + hover cards.
-- [ ] Tree-sitter grammar override for dialect-aware highlighting.
-- [ ] Context server exposing the full command catalog to the assistant.
+- [ ] Tree-sitter dialect highlighting.
 - [ ] Theme companion matching the SQLScout playground palette.

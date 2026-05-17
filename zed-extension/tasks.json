@@ -1,0 +1,10 @@
+[
+  {
+    "label": "SQLScout: open selection in playground",
+    "command": "xdg-open",
+    "args": ["https://sqlscout.app/?q=$ZED_SELECTED_TEXT"],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true,
+    "tags": ["sqlscout"]
+  }
+]
