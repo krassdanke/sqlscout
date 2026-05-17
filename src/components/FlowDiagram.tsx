@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { FlowGraph, FlowNode } from '../lib/ast-to-flow';
+import type { FlowGraph, FlowNode } from '@sqlscout/core';
 
 interface Props {
   graph: FlowGraph;

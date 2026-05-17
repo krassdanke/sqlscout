@@ -4,16 +4,21 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Multi-dialect SQL command explorer and visual playground.",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run build --workspaces --if-present && tsc -b && vite build",
     "preview": "vite preview --port 4173",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "test": "npm run test --workspaces --if-present",
+    "release:packages": "npm publish --workspaces --access public --dry-run"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
+    "@sqlscout/core": "*",
     "monaco-editor": "^0.52.0",
-    "node-sql-parser": "^5.3.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

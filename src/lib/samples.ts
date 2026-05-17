@@ -1,4 +1,4 @@
-import type { DialectId } from './dialects';
+import type { DialectId } from '@sqlscout/core';
 
 export interface Sample {
   id: string;

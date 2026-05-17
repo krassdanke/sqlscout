@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { CATEGORIES, COMMANDS, type SqlCommand } from '../data/commands';
 import { SAMPLES, type Sample } from '../lib/samples';
-import type { DialectId } from '../lib/dialects';
+import type { DialectId } from '@sqlscout/core';
 
 type Tab = 'commands' | 'samples' | 'docs';
 

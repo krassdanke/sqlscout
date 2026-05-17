@@ -4,9 +4,7 @@ import { CommandExplorer } from './components/CommandExplorer';
 import { EditorPane } from './components/EditorPane';
 import { FlowDiagram } from './components/FlowDiagram';
 import { StatusBar } from './components/StatusBar';
-import { DIALECT_BY_ID, type DialectId } from './lib/dialects';
-import { parseSql } from './lib/parser';
-import { astToFlow, type FlowGraph } from './lib/ast-to-flow';
+import { DIALECT_BY_ID, type DialectId, parseSql, astToFlow, type FlowGraph } from '@sqlscout/core';
 import { SAMPLES, type Sample } from './lib/samples';
 
 const EMPTY_GRAPH: FlowGraph = { nodes: [], edges: [], width: 600, height: 400, perfScore: 0, warnings: [] };

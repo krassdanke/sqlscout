@@ -1,5 +1,5 @@
 import { Parser } from 'node-sql-parser';
-import type { Dialect } from './dialects';
+import type { Dialect } from './dialects.js';
 
 const parser = new Parser();
 

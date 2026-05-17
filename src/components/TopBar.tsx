@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DIALECTS, type DialectId, type Dialect } from '../lib/dialects';
+import { DIALECTS, type DialectId, type Dialect } from '@sqlscout/core';
 
 interface Props {
   dialect: Dialect;

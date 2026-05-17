@@ -1,4 +1,4 @@
-import type { DialectId } from '../lib/dialects';
+import type { DialectId } from '@sqlscout/core';
 
 export type CommandCategory =
   | 'DML'
