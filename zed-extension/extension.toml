@@ -13,9 +13,3 @@ requires_argument = false
 [slash_commands.sqlscout-ref]
 description = "Insert a SQL command reference (select, join, window, cte, ...)"
 requires_argument = true
-
-[snippets]
-sql = "snippets/sql.json"
-
-[language_servers]
-# Reserved for future sqlscout-ls: parse diagnostics + inline flow data.
