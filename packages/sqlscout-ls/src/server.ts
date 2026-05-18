@@ -1,15 +1,28 @@
 import {
   CodeActionKind,
   Diagnostic,
+  ExecuteCommandParams,
   MarkupKind,
   ProposedFeatures,
+  ShowDocumentRequest,
   TextDocumentSyncKind,
   TextDocuments,
   createConnection,
 } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 import { detectSql, SqlMatch } from './detect.js';
-import { buildCodeActions, buildHoverMarkdown, validate } from './handlers.js';
+import {
+  buildCodeActions,
+  buildFlowMarkdown,
+  buildHoverMarkdown,
+  validate,
+} from './handlers.js';
+
+const SHOW_FLOW_CMD = 'sqlscout.showFlow';
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments<TextDocument>(TextDocument);
@@ -20,6 +33,9 @@ connection.onInitialize(() => ({
     hoverProvider: true,
     codeActionProvider: {
       codeActionKinds: [CodeActionKind.QuickFix],
+    },
+    executeCommandProvider: {
+      commands: [SHOW_FLOW_CMD],
     },
   },
 }));
@@ -65,6 +81,31 @@ connection.onCodeAction(({ textDocument, range }) => {
     }
   }
   return actions;
+});
+
+export function writeFlowFile(sql: string): string {
+  const hash = crypto.createHash('sha1').update(sql).digest('hex').slice(0, 8);
+  const dir = path.join(os.tmpdir(), 'sqlscout');
+  fs.mkdirSync(dir, { recursive: true });
+  const file = path.join(dir, `flow-${hash}.md`);
+  fs.writeFileSync(file, buildFlowMarkdown(sql), 'utf8');
+  return file;
+}
+
+function fileUri(p: string): string {
+  return 'file://' + (p.startsWith('/') ? p : '/' + p).replace(/\\/g, '/');
+}
+
+connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
+  if (params.command !== SHOW_FLOW_CMD) return null;
+  const sql = (params.arguments?.[0] as string) ?? '';
+  if (!sql) return null;
+  const file = writeFlowFile(sql);
+  await connection.sendRequest(ShowDocumentRequest.type, {
+    uri: fileUri(file),
+    takeFocus: true,
+  });
+  return null;
 });
 
 function rangeFromMatch(doc: TextDocument, m: SqlMatch) {

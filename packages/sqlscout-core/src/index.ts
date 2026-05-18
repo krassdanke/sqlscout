@@ -10,6 +10,11 @@ export type {
   FlowNodeKind,
 } from './ast-to-flow.js';
 export {
+  flowToAscii,
+  summarizeFlow,
+} from './flow-to-ascii.js';
+export type { FlowSummary } from './flow-to-ascii.js';
+export {
   DIALECTS,
   DIALECT_BY_ID,
 } from './dialects.js';

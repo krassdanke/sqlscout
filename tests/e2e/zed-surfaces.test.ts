@@ -2,18 +2,22 @@ import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { resolve } from 'node:path';
 import { once } from 'node:events';
+import * as fs from 'node:fs';
 
 const REPO = resolve(__dirname, '..', '..');
 
 interface JsonRpcReader {
-  readNext(): Promise<any>;
+  waitFor(predicate: (msg: any) => boolean, timeoutMs?: number): Promise<any>;
   close(): void;
 }
 
 function jsonRpcReader(proc: ChildProcessWithoutNullStreams): JsonRpcReader {
   let buffer = Buffer.alloc(0);
   const queue: any[] = [];
-  const waiters: Array<(msg: any) => void> = [];
+  const waiters: Array<{
+    predicate: (msg: any) => boolean;
+    resolve: (msg: any) => void;
+  }> = [];
 
   proc.stdout.on('data', (chunk: Buffer) => {
     buffer = Buffer.concat([buffer, chunk]);
@@ -37,18 +41,34 @@ function jsonRpcReader(proc: ChildProcessWithoutNullStreams): JsonRpcReader {
       } catch {
         continue;
       }
-      const waiter = waiters.shift();
-      if (waiter) waiter(msg);
-      else queue.push(msg);
+      const waiterIdx = waiters.findIndex(w => w.predicate(msg));
+      if (waiterIdx >= 0) {
+        const [w] = waiters.splice(waiterIdx, 1);
+        w.resolve(msg);
+      } else {
+        queue.push(msg);
+      }
     }
   });
 
   return {
-    readNext: () =>
-      new Promise((res) => {
-        const next = queue.shift();
-        if (next) res(next);
-        else waiters.push(res);
+    waitFor: (predicate, timeoutMs = 10000) =>
+      new Promise((resolveFn, rejectFn) => {
+        const idx = queue.findIndex(predicate);
+        if (idx >= 0) {
+          const [m] = queue.splice(idx, 1);
+          resolveFn(m);
+          return;
+        }
+        const entry = { predicate, resolve: resolveFn };
+        waiters.push(entry);
+        setTimeout(() => {
+          const i = waiters.indexOf(entry);
+          if (i >= 0) {
+            waiters.splice(i, 1);
+            rejectFn(new Error('waitFor timeout'));
+          }
+        }, timeoutMs);
       }),
     close: () => proc.kill(),
   };
@@ -69,9 +89,7 @@ describe('Zed integration surfaces (e2e)', () => {
     const request = async (method: string, params: any) => {
       const id = nextId++;
       send(proc, { jsonrpc: '2.0', id, method, params });
-      let msg = await reader.readNext();
-      while (!('id' in msg) || msg.id !== id) msg = await reader.readNext();
-      return msg;
+      return reader.waitFor((m) => m.id === id && !m.method);
     };
 
     beforeAll(async () => {
@@ -84,9 +102,10 @@ describe('Zed integration surfaces (e2e)', () => {
       const initResp = await request('initialize', {
         processId: process.pid,
         rootUri: null,
-        capabilities: {},
+        capabilities: { window: { showDocument: { support: true } } },
       });
       expect(initResp.result.capabilities).toBeTruthy();
+      expect(initResp.result.capabilities.executeCommandProvider?.commands).toContain('sqlscout.showFlow');
       send(proc, { jsonrpc: '2.0', method: 'initialized', params: {} });
     }, 20000);
 
@@ -94,19 +113,14 @@ describe('Zed integration surfaces (e2e)', () => {
       reader?.close();
     });
 
-    it('returns hover with playground link for SQL template literal', async () => {
+    it('returns hover with ASCII flow, perf score, and browser link', async () => {
       const uri = 'file:///tmp/queries.ts';
-      const text = "const q = sql`SELECT id FROM users`;\n";
+      const text = "const q = sql`SELECT id, name FROM users WHERE active = 1 LIMIT 10`;\n";
       send(proc, {
         jsonrpc: '2.0',
         method: 'textDocument/didOpen',
         params: {
-          textDocument: {
-            uri,
-            languageId: 'typescript',
-            version: 1,
-            text,
-          },
+          textDocument: { uri, languageId: 'typescript', version: 1, text },
         },
       });
       const selectIdx = text.indexOf('SELECT');
@@ -119,7 +133,37 @@ describe('Zed integration surfaces (e2e)', () => {
       });
       expect(hover.result).toBeTruthy();
       const value = hover.result?.contents?.value ?? '';
-      expect(value).toContain('Open in SQLScout');
+      expect(value).toMatch(/perf \*\*\d+\/100\*\*/);
+      expect(value).toContain('```text');
+      expect(value).toMatch(/TABLE\s+users/);
+      expect(value).toContain('Open in browser playground');
+    }, 10000);
+
+    it('executes sqlscout.showFlow → writes markdown file → requests window/showDocument', async () => {
+      const sql = 'SELECT id, total FROM orders WHERE status = \'paid\'';
+      const id = nextId++;
+      send(proc, {
+        jsonrpc: '2.0',
+        id,
+        method: 'workspace/executeCommand',
+        params: { command: 'sqlscout.showFlow', arguments: [sql] },
+      });
+
+      const showDocReq = await reader.waitFor(
+        (m) => m.method === 'window/showDocument',
+      );
+      expect(showDocReq.params.uri).toMatch(/^file:\/\/.+\/sqlscout\/flow-[a-f0-9]+\.md$/);
+      expect(showDocReq.params.takeFocus).toBe(true);
+
+      const filePath = showDocReq.params.uri.replace(/^file:\/\//, '');
+      const content = fs.readFileSync(filePath, 'utf8');
+      expect(content).toContain('# SQLScout');
+      expect(content).toContain('## Execution flow');
+      expect(content).toContain('## Source');
+      expect(content).toContain(sql);
+
+      send(proc, { jsonrpc: '2.0', id: showDocReq.id, result: { success: true } });
+      await reader.waitFor((m) => m.id === id && !m.method);
     }, 10000);
   });
 

@@ -1,18 +1,70 @@
 import { describe, expect, it } from 'vitest';
 import { DiagnosticSeverity } from 'vscode-languageserver';
-import { buildHoverMarkdown, validate } from '../src/handlers.js';
+import {
+  buildCodeActions,
+  buildFlowMarkdown,
+  buildHoverMarkdown,
+  validate,
+} from '../src/handlers.js';
 
 describe('buildHoverMarkdown', () => {
-  it('returns markdown with statement summary and SQLScout link for valid SQL', () => {
-    const md = buildHoverMarkdown('SELECT 1');
-    expect(md).toContain('Open in SQLScout');
-    expect(md).toMatch(/statement/);
+  it('shows statement type, perf score, and ASCII flow for SELECT', () => {
+    const md = buildHoverMarkdown('SELECT id, name FROM users WHERE active = 1 LIMIT 10');
+    expect(md).toMatch(/SELECT/);
+    expect(md).toMatch(/perf \*\*\d+\/100\*\*/);
+    expect(md).toContain('```text');
+    expect(md).toMatch(/TABLE\s+users/);
+    expect(md).toContain('Open in browser playground');
   });
 
-  it('returns parse error message for invalid SQL', () => {
+  it('lists tables involved', () => {
+    const md = buildHoverMarkdown('SELECT * FROM orders JOIN customers ON orders.cust_id = customers.id');
+    expect(md).toContain('Tables');
+    expect(md).toContain('orders');
+    expect(md).toContain('customers');
+  });
+
+  it('surfaces performance hints', () => {
+    const md = buildHoverMarkdown('SELECT * FROM big_table');
+    expect(md).toContain('Hints');
+    expect(md.toLowerCase()).toContain('select *');
+  });
+
+  it('returns parse error block for invalid SQL', () => {
     const md = buildHoverMarkdown('SELEC bad');
-    expect(md.toLowerCase()).toContain('parse');
-    expect(md).toContain('Open in SQLScout');
+    expect(md).toContain('parse error');
+    expect(md).toContain('Open in browser playground');
+  });
+});
+
+describe('buildFlowMarkdown', () => {
+  it('produces a full document with sections', () => {
+    const md = buildFlowMarkdown('SELECT a FROM t WHERE x = 1');
+    expect(md).toContain('# SQLScout');
+    expect(md).toContain('## Execution flow');
+    expect(md).toContain('## Source');
+    expect(md).toContain('## Performance hints');
+    expect(md).toContain('```sql');
+    expect(md).toContain('SELECT a FROM t WHERE x = 1');
+  });
+
+  it('handles parse errors gracefully', () => {
+    const md = buildFlowMarkdown('SELEC bad');
+    expect(md).toContain('parse error');
+    expect(md).toContain('## Source');
+  });
+});
+
+describe('buildCodeActions', () => {
+  it('returns showFlow, openUrl, and extract actions', () => {
+    const actions = buildCodeActions('file:///x.ts', { start: 0, end: 8, sql: 'SELECT 1' });
+    expect(actions).toHaveLength(3);
+    const titles = actions.map(a => a.title);
+    expect(titles[0]).toMatch(/Show flow in tab/);
+    expect(titles[1]).toMatch(/browser/);
+    expect(titles[2]).toMatch(/Extract/);
+    expect(actions[0].command?.command).toBe('sqlscout.showFlow');
+    expect(actions[0].command?.arguments?.[0]).toBe('SELECT 1');
   });
 });
 

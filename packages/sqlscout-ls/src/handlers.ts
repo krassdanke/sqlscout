@@ -5,38 +5,17 @@ import {
   DiagnosticSeverity,
   Range,
 } from 'vscode-languageserver';
-import { parseSql, DIALECT_BY_ID } from '@sqlscout/core';
+import {
+  parseSql,
+  astToFlow,
+  flowToAscii,
+  summarizeFlow,
+  DIALECT_BY_ID,
+} from '@sqlscout/core';
 import { playgroundUrl } from './url.js';
 import type { SqlMatch } from './detect.js';
 
-function topLevelClauseNames(ast: any): string[] {
-  if (!ast || typeof ast !== 'object') return [];
-  const clauseKeys = [
-    'with',
-    'select',
-    'from',
-    'where',
-    'groupby',
-    'having',
-    'orderby',
-    'limit',
-    'union',
-    'set',
-    'values',
-    'returning',
-  ];
-  const found: string[] = [];
-  if (typeof ast.type === 'string') {
-    found.push(ast.type.toUpperCase());
-  }
-  for (const key of clauseKeys) {
-    const v = ast[key];
-    if (v === null || v === undefined) continue;
-    if (Array.isArray(v) && v.length === 0) continue;
-    found.push(key.toUpperCase());
-  }
-  return found;
-}
+const MAX_HOVER_FLOW_LINES = 18;
 
 function collectTables(ast: any, acc: Set<string>): void {
   if (!ast || typeof ast !== 'object') return;
@@ -53,52 +32,182 @@ function collectTables(ast: any, acc: Set<string>): void {
   }
 }
 
+function topStatementType(ast: any): string {
+  if (ast?.with && (ast?.type === 'select' || ast?.select)) return 'SELECT (with CTE)';
+  if (typeof ast?.type === 'string') return ast.type.toUpperCase();
+  return 'STATEMENT';
+}
+
+function clampLines(s: string, max: number): string {
+  const lines = s.split('\n');
+  if (lines.length <= max) return s;
+  return [...lines.slice(0, max), `  … (${lines.length - max} more lines — use **Show flow in tab**)`].join('\n');
+}
+
 export function buildHoverMarkdown(sql: string): string {
   const result = parseSql(sql, DIALECT_BY_ID.postgresql);
   const url = playgroundUrl(sql);
-  const linkLine = `[Open in SQLScout](${url})`;
+  const footer = `\n\n---\n[Open in browser playground](${url})`;
+
   if (!result.ok) {
     const msg = result.error?.message ?? 'parse error';
-    return `**SQL parse error:** ${msg}\n\n${linkLine}`;
+    return `**SQL parse error**\n\n\`\`\`\n${msg}\n\`\`\`${footer}`;
   }
-  const stmtCount = result.statements.length;
+
+  const stmts = result.statements;
+  if (stmts.length === 0) {
+    return `_(empty SQL)_${footer}`;
+  }
+
+  const graph = astToFlow(stmts.map(s => s.ast));
+  const summary = summarizeFlow(graph, stmts.length);
+  const stmtType = topStatementType(stmts[stmts.length - 1].ast);
+
   const tables = new Set<string>();
-  const clauseSet = new Set<string>();
-  for (const stmt of result.statements) {
-    collectTables(stmt.ast, tables);
-    for (const c of topLevelClauseNames(stmt.ast)) clauseSet.add(c);
+  for (const s of stmts) collectTables(s.ast, tables);
+
+  const out: string[] = [];
+  out.push(`**${stmtType}** · ${stmts.length} stmt${stmts.length === 1 ? '' : 's'} · perf **${summary.perfScore}/100**`);
+
+  if (graph.nodes.length > 0) {
+    out.push('');
+    out.push('```text');
+    out.push(clampLines(flowToAscii(graph), MAX_HOVER_FLOW_LINES));
+    out.push('```');
   }
-  const lines: string[] = [];
-  lines.push(`**SQL** — ${stmtCount} statement${stmtCount === 1 ? '' : 's'}`);
-  if (clauseSet.size > 0) {
-    lines.push(`Clauses: ${[...clauseSet].join(', ')}`);
+
+  if (tables.size > 0) {
+    const list = [...tables].slice(0, 6).join(', ');
+    const more = tables.size > 6 ? ` +${tables.size - 6}` : '';
+    out.push(`**Tables (${tables.size}):** ${list}${more}`);
   }
-  lines.push(`Tables: ${tables.size}${tables.size > 0 ? ` (${[...tables].join(', ')})` : ''}`);
-  lines.push('');
-  lines.push(linkLine);
-  return lines.join('\n');
+
+  if (summary.warnings.length > 0) {
+    out.push('');
+    out.push('**Hints:**');
+    for (const w of summary.warnings) out.push(`- ${w}`);
+  }
+
+  out.push('');
+  out.push('_Cmd-. → **Show flow in tab** for full view_');
+  out.push(footer.replace(/^\n+/, ''));
+
+  return out.join('\n');
+}
+
+export function buildFlowMarkdown(sql: string): string {
+  const result = parseSql(sql, DIALECT_BY_ID.postgresql);
+  const url = playgroundUrl(sql);
+
+  if (!result.ok) {
+    const msg = result.error?.message ?? 'parse error';
+    return [
+      '# SQLScout — parse error',
+      '',
+      '```text',
+      msg,
+      '```',
+      '',
+      '## Source',
+      '',
+      '```sql',
+      sql,
+      '```',
+      '',
+      `[Open in browser playground](${url})`,
+      '',
+    ].join('\n');
+  }
+
+  const stmts = result.statements;
+  const graph = astToFlow(stmts.map(s => s.ast));
+  const summary = summarizeFlow(graph, stmts.length);
+  const stmtType = topStatementType(stmts[stmts.length - 1].ast);
+
+  const tables = new Set<string>();
+  for (const s of stmts) collectTables(s.ast, tables);
+
+  const out: string[] = [];
+  out.push(`# SQLScout — ${stmtType}`);
+  out.push('');
+  out.push(`**Statements:** ${stmts.length} · **Perf score:** ${summary.perfScore}/100 · **Dialect:** PostgreSQL`);
+  out.push('');
+  out.push('## Execution flow');
+  out.push('');
+  out.push('```text');
+  out.push(graph.nodes.length === 0 ? '(no flow — non-SELECT)' : flowToAscii(graph));
+  out.push('```');
+  out.push('');
+
+  if (tables.size > 0) {
+    out.push(`## Tables (${tables.size})`);
+    out.push('');
+    for (const t of tables) out.push(`- \`${t}\``);
+    out.push('');
+  }
+
+  if (summary.ctes.length > 0) {
+    out.push(`## CTEs (${summary.ctes.length})`);
+    out.push('');
+    for (const c of summary.ctes) out.push(`- \`${c}\``);
+    out.push('');
+  }
+
+  if (summary.warnings.length > 0) {
+    out.push('## Performance hints');
+    out.push('');
+    for (const w of summary.warnings) out.push(`- ${w}`);
+    out.push('');
+  } else {
+    out.push('## Performance hints');
+    out.push('');
+    out.push('_No issues detected._');
+    out.push('');
+  }
+
+  out.push('## Source');
+  out.push('');
+  out.push('```sql');
+  out.push(sql);
+  out.push('```');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push(`[Open interactive playground in browser](${url})`);
+  out.push('');
+
+  return out.join('\n');
 }
 
 export function buildCodeActions(uri: string, match: SqlMatch): CodeAction[] {
-  const openAction: CodeAction = {
-    title: 'Open in SQLScout',
+  const showFlow: CodeAction = {
+    title: 'SQLScout: Show flow in tab',
     kind: CodeActionKind.QuickFix,
     command: {
-      title: 'Open in SQLScout',
+      title: 'SQLScout: Show flow in tab',
+      command: 'sqlscout.showFlow',
+      arguments: [match.sql],
+    },
+  };
+  const openBrowser: CodeAction = {
+    title: 'SQLScout: Open in browser playground',
+    kind: CodeActionKind.QuickFix,
+    command: {
+      title: 'SQLScout: Open in browser playground',
       command: 'sqlscout.openUrl',
       arguments: [playgroundUrl(match.sql)],
     },
   };
-  const extractAction: CodeAction = {
-    title: 'Extract to .sql file',
+  const extract: CodeAction = {
+    title: 'SQLScout: Extract to .sql file',
     kind: CodeActionKind.QuickFix,
     command: {
-      title: 'Extract to .sql file',
+      title: 'SQLScout: Extract to .sql file',
       command: 'sqlscout.extractToFile',
       arguments: [uri, match.sql],
     },
   };
-  return [openAction, extractAction];
+  return [showFlow, openBrowser, extract];
 }
 
 function hasPositionalGroupBy(ast: any): boolean {
