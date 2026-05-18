@@ -11,3 +11,4 @@ name = "SQLScout"
 languages = ["SQL", "TypeScript", "TSX", "JavaScript", "JSX", "Python", "Rust", "Go"]
 
 [context_servers.sqlscout-mcp]
+name = "SQLScout MCP"
