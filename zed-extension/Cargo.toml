@@ -9,7 +9,7 @@ path = "src/sqlscout.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-zed_extension_api = "0.6"
+zed_extension_api = "0.5"
 
 # Required for WSL-UNC builds: cargo cannot create session lock files over
 # the 9P bridge ("Unzulässige Funktion" / os error -2147024895). Disabling
